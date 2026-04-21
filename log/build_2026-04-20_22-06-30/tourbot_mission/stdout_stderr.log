@@ -1,0 +1,17 @@
+running egg_info
+writing ../../build/tourbot_mission/tourbot_mission.egg-info/PKG-INFO
+writing dependency_links to ../../build/tourbot_mission/tourbot_mission.egg-info/dependency_links.txt
+writing requirements to ../../build/tourbot_mission/tourbot_mission.egg-info/requires.txt
+writing top-level names to ../../build/tourbot_mission/tourbot_mission.egg-info/top_level.txt
+reading manifest file '../../build/tourbot_mission/tourbot_mission.egg-info/SOURCES.txt'
+writing manifest file '../../build/tourbot_mission/tourbot_mission.egg-info/SOURCES.txt'
+running build
+running build_py
+running install
+running install_lib
+running install_data
+running install_egg_info
+removing '/home/hyde/School/Intelligent-Robotics/tour_guide_robot/install/tourbot_mission/lib/python3.12/site-packages/tourbot_mission-0.0.0-py3.12.egg-info' (and everything under it)
+Copying ../../build/tourbot_mission/tourbot_mission.egg-info to /home/hyde/School/Intelligent-Robotics/tour_guide_robot/install/tourbot_mission/lib/python3.12/site-packages/tourbot_mission-0.0.0-py3.12.egg-info
+running install_scripts
+writing list of installed files to '/home/hyde/School/Intelligent-Robotics/tour_guide_robot/build/tourbot_mission/install.log'

@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: tourbot-mission
+Version: 0.0.0
+Summary: Mission-level control for the TurtleBot4 tour guide robot.
+Maintainer: Hyde
+Maintainer-email: 108911977+Hyaxon@users.noreply.github.com
+License: MIT
+Provides-Extra: test

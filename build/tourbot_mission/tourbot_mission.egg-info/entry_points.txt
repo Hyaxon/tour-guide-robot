@@ -1,0 +1,2 @@
+[console_scripts]
+tour_deliberation_node = tourbot_mission.tour_deliberation_node:main
