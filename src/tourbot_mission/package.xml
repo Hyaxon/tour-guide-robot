@@ -12,6 +12,7 @@
   <depend>rclpy</depend>
   <depend>geometry_msgs</depend>
   <depend>nav2_msgs</depend>
+  <depend>apriltag_msgs</depend>
 
   <exec_depend>ros2launch</exec_depend>
 

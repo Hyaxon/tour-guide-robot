@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'tour_deliberation_node = tourbot_mission.tour_deliberation_node:main',
+            'door_detector_node = tourbot_mission.door_detector_node:main',
         ],
     },
 )
