@@ -9,7 +9,7 @@ class TourDeliberationNode(Node):
 
         self.landmarks = [
             {"name": "stop_1", "x": 1.0, "y": 0.5, "yaw": 0.0},
-            {"name": "stop_2", "x": 20.0, "y": -10.0, "yaw": 1.57},
+            {"name": "stop_2", "x": 0.0, "y": 5.0, "yaw": 1.57},
         ]
 
         self.nav_client = NavToPoseClient()
@@ -29,7 +29,7 @@ class TourDeliberationNode(Node):
             rclpy.shutdown()
             return
 
-        target = self.landmarks[0]
+        target = self.landmarks[1]
         self.get_logger().info(f'Selected landmark: {target["name"]}')
 
         send_goal_future = self.nav_client.send_goal(

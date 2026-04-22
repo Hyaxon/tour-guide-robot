@@ -3,6 +3,7 @@ setup.cfg
 setup.py
 resource/tourbot_mission
 tourbot_mission/__init__.py
+tourbot_mission/door_detector_node.py
 tourbot_mission/nav_to_pose_client.py
 tourbot_mission/tour_deliberation_node.py
 tourbot_mission.egg-info/PKG-INFO

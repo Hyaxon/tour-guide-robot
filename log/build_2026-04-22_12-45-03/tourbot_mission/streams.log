@@ -1,0 +1,20 @@
+[1.648s] Invoking command in '/home/hyde/School/Intelligent-Robotics/tour_guide_robot/build/tourbot_mission': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) > $_LIBERTY PYTHONPATH=/home/hyde/School/Intelligent-Robotics/tour_guide_robot/build/tourbot_mission/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/hyde/School/Intelligent-Robotics/tour_guide_robot/install/tourbot_mission/lib/python3.12/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(.venv) /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/hyde/School/Intelligent-Robotics/tour_guide_robot/build/tourbot_mission/build --no-deps symlink_data
+[2.359s] running develop
+[2.649s] /usr/lib/python3/dist-packages/setuptools/command/easy_install.py:363: UserWarning: Unbuilt egg for pytest-repeat [unknown version] (/usr/lib/python3/dist-packages)
+[2.650s]   self.local_index = Environment(self.shadow_path + sys.path)
+[2.726s] running egg_info
+[2.756s] writing tourbot_mission.egg-info/PKG-INFO
+[2.756s] writing dependency_links to tourbot_mission.egg-info/dependency_links.txt
+[2.756s] writing entry points to tourbot_mission.egg-info/entry_points.txt
+[2.756s] writing requirements to tourbot_mission.egg-info/requires.txt
+[2.757s] writing top-level names to tourbot_mission.egg-info/top_level.txt
+[2.824s] reading manifest file 'tourbot_mission.egg-info/SOURCES.txt'
+[2.825s] writing manifest file 'tourbot_mission.egg-info/SOURCES.txt'
+[2.863s] running build_ext
+[2.863s] Creating /home/hyde/School/Intelligent-Robotics/tour_guide_robot/install/tourbot_mission/lib/python3.12/site-packages/tourbot-mission.egg-link (link to .)
+[2.864s] Installing door_detector_node script to /home/hyde/School/Intelligent-Robotics/tour_guide_robot/install/tourbot_mission/lib/tourbot_mission
+[2.864s] Installing tour_deliberation_node script to /home/hyde/School/Intelligent-Robotics/tour_guide_robot/install/tourbot_mission/lib/tourbot_mission
+[2.864s] 
+[2.864s] Installed /home/hyde/School/Intelligent-Robotics/tour_guide_robot/build/tourbot_mission
+[2.864s] running symlink_data
+[2.912s] Invoked command in '/home/hyde/School/Intelligent-Robotics/tour_guide_robot/build/tourbot_mission' returned '0': DEBUGINFOD_URLS=https://debuginfod.ubuntu.com PS1=(.venv) > $_LIBERTY PYTHONPATH=/home/hyde/School/Intelligent-Robotics/tour_guide_robot/build/tourbot_mission/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/hyde/School/Intelligent-Robotics/tour_guide_robot/install/tourbot_mission/lib/python3.12/site-packages:${PYTHONPATH} VIRTUAL_ENV_PROMPT=(.venv) /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/hyde/School/Intelligent-Robotics/tour_guide_robot/build/tourbot_mission/build --no-deps symlink_data
