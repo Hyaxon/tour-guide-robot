@@ -1,3 +1,0 @@
-[console_scripts]
-door_detector_node = tourbot_mission.door_detector_node:main
-tour_deliberation_node = tourbot_mission.tour_deliberation_node:main
