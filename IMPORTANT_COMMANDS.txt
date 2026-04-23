@@ -2,3 +2,9 @@ Launch nav2, sim, and rviz
 
 ros2 launch turtlebot4_gz_bringup turtlebot4_gz.launch.py nav2:=true slam:=false localization:=true rviz:=true
 
+Starting packages: 
+
+ros2 run tourbot_behaviors door_behavior_server
+
+ros2 run tourbot_mission tour_deliberation_node 
+
