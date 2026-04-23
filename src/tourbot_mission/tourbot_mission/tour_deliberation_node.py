@@ -1,78 +1,62 @@
+#!/usr/bin/env python3
+
+# Copyright 2022 Clearpath Robotics, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# @author Roni Kreinin (rkreinin@clearpathrobotics.com)
+
 import rclpy
-from rclpy.node import Node
 
-from .nav_to_pose_client import NavToPoseClient
-
-class TourDeliberationNode(Node):
-    def __init__(self) -> None:
-        super().__init__('tour_deliberation_node')
-
-        self.landmarks = [
-            {"name": "stop_1", "x": 1.0, "y": 0.5, "yaw": 0.0},
-            {"name": "stop_2", "x": 0.0, "y": 5.0, "yaw": 1.57},
-        ]
-
-        self.nav_client = NavToPoseClient()
-        self.goal_handle = None
-        self.result_future = None
-
-        self.timer = self.create_timer(1.0, self.start_once)
-        self.started = False
-
-    def start_once(self) -> None:
-        if self.started:
-            return
-        self.started = True
-
-        if not self.nav_client.wait_for_server():
-            self.get_logger().error('Nav2 action server not available.')
-            rclpy.shutdown()
-            return
-
-        target = self.landmarks[1]
-        self.get_logger().info(f'Selected landmark: {target["name"]}')
-
-        send_goal_future = self.nav_client.send_goal(
-            target["x"],
-            target["y"],
-            target["yaw"],
-        )
-        send_goal_future.add_done_callback(self.goal_response_callback)
-
-    def goal_response_callback(self, future) -> None:
-        self.goal_handle = future.result()
-        if not self.goal_handle.accepted:
-            self.get_logger().error('Goal rejected by Nav2.')
-            rclpy.shutdown()
-            return
-
-        self.get_logger().info('Goal accepted.')
-        self.result_future = self.goal_handle.get_result_async()
-        self.result_future.add_done_callback(self.goal_result_callback)
-
-    def goal_result_callback(self, future) -> None:
-        result = future.result()
-        status = result.status
-
-        self.get_logger().info(f'Navigation finished with status code: {status}')
-        rclpy.shutdown()
+from turtlebot4_navigation.turtlebot4_navigator import TurtleBot4Directions, TurtleBot4Navigator
 
 
-def main(args=None) -> None:
-    rclpy.init(args=args)
+def main():
+    rclpy.init()
 
-    node = TourDeliberationNode()
-    executor = rclpy.executors.SingleThreadedExecutor()
-    executor.add_node(node)
-    executor.add_node(node.nav_client)
+    navigator = TurtleBot4Navigator()
 
-    try:
-        executor.spin()
-    finally:
-        node.destroy_node()
-        node.nav_client.destroy_node()
-        if rclpy.ok():
-            rclpy.shutdown()
+    # Start on dock
+    if not navigator.getDockedStatus():
+        navigator.info('Docking before intialising pose')
+        navigator.dock()
+
+    # Set initial pose
+    initial_pose = navigator.getPoseStamped([0.0, 0.0], TurtleBot4Directions.NORTH)
+    navigator.setInitialPose(initial_pose)
+
+    # Wait for Nav2
+    navigator.waitUntilNav2Active()
+
+    # Set goal poses
+    goal_pose = []
+    goal_pose.append(navigator.getPoseStamped([-3.0, -0.0], TurtleBot4Directions.EAST))
+    goal_pose.append(navigator.getPoseStamped([-3.0, -3.0], TurtleBot4Directions.NORTH))
+    goal_pose.append(navigator.getPoseStamped([3.0, -3.0], TurtleBot4Directions.NORTH_WEST))
+    goal_pose.append(navigator.getPoseStamped([9.0, -1.0], TurtleBot4Directions.WEST))
+    goal_pose.append(navigator.getPoseStamped([9.0, 1.0], TurtleBot4Directions.SOUTH))
+    goal_pose.append(navigator.getPoseStamped([-1.0, 1.0], TurtleBot4Directions.EAST))
+
+
+    # Undock
+    navigator.undock()
+
+    # Go to each goal pose
+    navigator.startThroughPoses(goal_pose)
+
+    navigator.dock()
+
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':
