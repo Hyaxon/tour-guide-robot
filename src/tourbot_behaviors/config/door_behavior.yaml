@@ -1,0 +1,14 @@
+door_behavior_server:
+  ros__parameters:
+    cmd_vel_topic: /cmd_vel
+    odom_topic: /odom
+    door_open_topic: /door_open
+
+    backup_distance_default: 0.9
+    backup_speed_default: 0.15
+    wait_seconds_default: 3.0
+    forward_distance_default: 1.5
+    forward_speed_default: 0.18
+
+    control_rate_hz: 10.0
+    wait_for_open_timeout: 30.0

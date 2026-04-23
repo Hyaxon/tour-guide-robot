@@ -1,0 +1,16 @@
+# Goal
+float32 backup_distance
+float32 backup_speed
+float32 wait_seconds
+float32 forward_distance
+float32 forward_speed
+
+---
+# Result
+bool success
+string message
+
+---
+# Feedback
+string current_state
+float32 distance_traveled
