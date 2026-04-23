@@ -1,17 +1,9 @@
 package.xml
 setup.cfg
 setup.py
-../../build/tourbot_mission/tourbot_mission.egg-info/PKG-INFO
-../../build/tourbot_mission/tourbot_mission.egg-info/SOURCES.txt
-../../build/tourbot_mission/tourbot_mission.egg-info/dependency_links.txt
-../../build/tourbot_mission/tourbot_mission.egg-info/entry_points.txt
-../../build/tourbot_mission/tourbot_mission.egg-info/requires.txt
-../../build/tourbot_mission/tourbot_mission.egg-info/top_level.txt
-../../build/tourbot_mission/tourbot_mission.egg-info/zip-safe
 resource/tourbot_mission
 tourbot_mission/__init__.py
 tourbot_mission/door_detector_node.py
-tourbot_mission/nav_to_pose_client.py
 tourbot_mission/tour_deliberation_node.py
 tourbot_mission.egg-info/PKG-INFO
 tourbot_mission.egg-info/SOURCES.txt
