@@ -8,3 +8,4 @@ ros2 run tourbot_behaviors door_behavior_server
 
 ros2 run tourbot_mission tour_deliberation_node 
 
+ros2 action send_goal /door_traverse tourbot_interfaces/action/DoorTraverse \ "{backup_distance: 0.9, backup_speed: 0.15, wait_seconds: 3.0, forward_distance: 1.5, forward_speed: 0.18}"

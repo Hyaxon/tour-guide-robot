@@ -43,7 +43,6 @@ def main():
 
     # Set goal poses
     goal_poses = []
-    goal_poses = []
     for landmark in landmark_data["landmarks"]:
         goal_poses.append(landmark_to_pose(navigator, landmark))
 
