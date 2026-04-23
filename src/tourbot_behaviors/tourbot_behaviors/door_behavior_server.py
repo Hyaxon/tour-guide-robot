@@ -15,6 +15,7 @@ from nav_msgs.msg import Odometry
 
 from tourbot_interfaces.action import DoorTraverse
 
+##TODO: Make it beep as it does these actions
 
 class DoorBehaviorServer(Node):
     def __init__(self) -> None:
