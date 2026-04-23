@@ -15,7 +15,6 @@ from nav_msgs.msg import Odometry
 
 from tourbot_interfaces.action import DoorTraverse
 
-
 class DoorBehaviorServer(Node):
     def __init__(self) -> None:
         super().__init__('door_behavior_server')
