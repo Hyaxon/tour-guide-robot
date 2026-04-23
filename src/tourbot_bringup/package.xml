@@ -3,10 +3,16 @@
 <package format="3">
   <name>tourbot_bringup</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="108911977+Hyaxon@users.noreply.github.com">hyde</maintainer>
+  <description>Bringup package for the TurtleBot4 tour guide robot.</description>
+  <maintainer email="108911977+Hyaxon@users.noreply.github.com">Hyde</maintainer>
   <license>MIT</license>
 
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
+  
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>

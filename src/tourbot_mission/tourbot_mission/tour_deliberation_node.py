@@ -1,78 +1,61 @@
 import rclpy
-from rclpy.node import Node
 
-from .nav_to_pose_client import NavToPoseClient
+from turtlebot4_navigation.turtlebot4_navigator import (
+    TurtleBot4Directions,
+    TurtleBot4Navigator,
+)
 
-class TourDeliberationNode(Node):
-    def __init__(self) -> None:
-        super().__init__('tour_deliberation_node')
+from tourbot_landmarks.landmarks_loader import load_landmarks
 
-        self.landmarks = [
-            {"name": "stop_1", "x": 1.0, "y": 0.5, "yaw": 0.0},
-            {"name": "stop_2", "x": 20.0, "y": -10.0, "yaw": 1.57},
-        ]
-
-        self.nav_client = NavToPoseClient()
-        self.goal_handle = None
-        self.result_future = None
-
-        self.timer = self.create_timer(1.0, self.start_once)
-        self.started = False
-
-    def start_once(self) -> None:
-        if self.started:
-            return
-        self.started = True
-
-        if not self.nav_client.wait_for_server():
-            self.get_logger().error('Nav2 action server not available.')
-            rclpy.shutdown()
-            return
-
-        target = self.landmarks[0]
-        self.get_logger().info(f'Selected landmark: {target["name"]}')
-
-        send_goal_future = self.nav_client.send_goal(
-            target["x"],
-            target["y"],
-            target["yaw"],
-        )
-        send_goal_future.add_done_callback(self.goal_response_callback)
-
-    def goal_response_callback(self, future) -> None:
-        self.goal_handle = future.result()
-        if not self.goal_handle.accepted:
-            self.get_logger().error('Goal rejected by Nav2.')
-            rclpy.shutdown()
-            return
-
-        self.get_logger().info('Goal accepted.')
-        self.result_future = self.goal_handle.get_result_async()
-        self.result_future.add_done_callback(self.goal_result_callback)
-
-    def goal_result_callback(self, future) -> None:
-        result = future.result()
-        status = result.status
-
-        self.get_logger().info(f'Navigation finished with status code: {status}')
-        rclpy.shutdown()
-
-
-def main(args=None) -> None:
-    rclpy.init(args=args)
-
-    node = TourDeliberationNode()
-    executor = rclpy.executors.SingleThreadedExecutor()
-    executor.add_node(node)
-    executor.add_node(node.nav_client)
-
+def to_direction(direction_name: str):
     try:
-        executor.spin()
-    finally:
-        node.destroy_node()
-        node.nav_client.destroy_node()
-        if rclpy.ok():
-            rclpy.shutdown()
+        return getattr(TurtleBot4Directions, direction_name)
+    except AttributeError as e:
+        raise ValueError(f"Invalid direction '{direction_name}' in landmarks.yaml") from e
+
+
+def landmark_to_pose(navigator: TurtleBot4Navigator, landmark: dict):
+    return navigator.getPoseStamped(
+        [float(landmark["x"]), float(landmark["y"])],
+        to_direction(landmark["theta"])
+    )
+
+def main():
+    rclpy.init()
+
+    navigator = TurtleBot4Navigator()
+
+    map_name = "default"
+    landmark_data = load_landmarks(map_name)
+
+    # Start on dock
+    if not navigator.getDockedStatus():
+        navigator.info('Docking before intialising pose')
+        navigator.dock()
+
+    # Set initial pose
+    initial_pose_data = landmark_data["home"]
+    initial_pose = landmark_to_pose(navigator, initial_pose_data)
+    navigator.setInitialPose(initial_pose)
+
+    # Wait for Nav2
+    navigator.waitUntilNav2Active()
+
+    # Set goal poses
+    goal_poses = []
+    goal_poses = []
+    for landmark in landmark_data["landmarks"]:
+        goal_poses.append(landmark_to_pose(navigator, landmark))
+
+    # Undock
+    navigator.undock()
+
+    # Go to each goal pose
+    navigator.startThroughPoses(goal_poses)
+
+    navigator.dock()
+
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':
