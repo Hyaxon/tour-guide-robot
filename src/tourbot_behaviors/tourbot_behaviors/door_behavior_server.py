@@ -87,11 +87,13 @@ class DoorBehaviorServer(Node):
 
     def stop_robot(self) -> None:
         msg = TwistStamped()
+        msg.header.frame_id = 'base_link'
         msg.header.stamp = self.get_clock().now().to_msg()
         self.cmd_pub.publish(msg)
 
     def set_linear_velocity(self, speed: float) -> None:
         msg = TwistStamped()
+        msg.header.frame_id = 'base_link'
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.twist.linear.x = float(speed)
         self.cmd_pub.publish(msg)
