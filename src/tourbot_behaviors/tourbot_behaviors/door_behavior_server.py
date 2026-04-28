@@ -30,7 +30,7 @@ class DoorBehaviorServer(Node):
         self.declare_parameter('forward_distance_default', 1.5)
         self.declare_parameter('forward_speed_default', 0.18)
 
-        self.declare_parameter('control_rate_hz', 10.0)
+        self.declare_parameter('control_rate_hz', 20.0)
 
         cmd_vel_topic = self.get_parameter('cmd_vel_topic').value
         odom_topic = self.get_parameter('odom_topic').value
