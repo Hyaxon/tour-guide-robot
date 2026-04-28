@@ -1,4 +1,5 @@
 import math
+from math import atan2
 import time
 from typing import Optional, Tuple
 
@@ -29,6 +30,7 @@ class DoorBehaviorServer(Node):
         self.declare_parameter('wait_seconds_default', 3.0)
         self.declare_parameter('forward_distance_default', 1.5)
         self.declare_parameter('forward_speed_default', 0.18)
+        self.declare_parameter('turn_speed_default', 0.8)
 
         self.declare_parameter('control_rate_hz', 20.0)
 
@@ -44,8 +46,8 @@ class DoorBehaviorServer(Node):
         self.forward_speed_default = float(self.get_parameter('forward_speed_default').value)
 
         #self.cmd_pub = self.create_publisher(Twist, cmd_vel_topic, 10)
-        self.cmd_pub = self.create_publisher(TwistStamped, "/cmd_vel", 10)
-
+        self.cmd_pub = self.create_publisher(TwistStamped, cmd_vel_topic, 10)
+        
         self.odom_sub = self.create_subscription(
             Odometry,
             odom_topic,
@@ -55,6 +57,7 @@ class DoorBehaviorServer(Node):
         )
 
         self.current_odom: Optional[Odometry] = None
+        self.current_yaw: Optional[float] = None
 
         self._action_server = ActionServer(
             self,
@@ -78,6 +81,13 @@ class DoorBehaviorServer(Node):
 
     def odom_cb(self, msg: Odometry) -> None:
         self.current_odom = msg
+
+        q = msg.pose.pose.orientation
+
+        siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+        cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+
+        self.current_yaw = math.atan2(siny_cosp, cosy_cosp)
 
     def publish_feedback(self, goal_handle, state: str, distance: float) -> None:
         feedback = DoorTraverse.Feedback()
@@ -111,6 +121,17 @@ class DoorBehaviorServer(Node):
         dx = current_xy[0] - start_xy[0]
         dy = current_xy[1] - start_xy[1]
         return math.sqrt(dx * dx + dy * dy)
+
+    def normalize_angle(self, angle: float) -> float:
+        while angle > math.pi:
+            angle -= 2.0 * math.pi
+        while angle < -math.pi:
+            angle += 2.0 * math.pi
+        return angle
+
+
+    def angle_diff(self, target: float, current: float) -> float:
+        return self.normalize_angle(target - current)
 
     def wait_with_cancel(self, seconds: float, goal_handle, state_name: str) -> Tuple[bool, str]:
         start_time = time.monotonic()
@@ -170,6 +191,56 @@ class DoorBehaviorServer(Node):
         self.stop_robot()
         return False, 'ROS shutdown during motion'
 
+    def set_angular_velocity(self, speed: float) -> None:
+        msg = TwistStamped()
+        msg.header.frame_id = 'base_link'
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.twist.linear.x = 0.0
+        msg.twist.angular.z = float(speed)
+        self.cmd_pub.publish(msg)
+
+    def turn_relative_angle(
+        self,
+        angle_rad: float,
+        angular_speed: float,
+        goal_handle,
+        state_name: str
+    ) -> Tuple[bool, str]:
+        if self.current_yaw is None:
+            self.stop_robot()
+            return False, 'No odometry yaw available'
+
+        start_yaw = self.current_yaw
+        target_yaw = self.normalize_angle(start_yaw + angle_rad)
+
+        sleep_dt = 1.0 / self.control_rate_hz
+
+        while rclpy.ok():
+            if goal_handle.is_cancel_requested:
+                self.stop_robot()
+                goal_handle.canceled()
+                return False, 'Canceled'
+
+            if self.current_yaw is None:
+                self.stop_robot()
+                return False, 'Lost odometry yaw during turn'
+
+            error = self.angle_diff(target_yaw, self.current_yaw)
+
+            self.publish_feedback(goal_handle, state_name, abs(error))
+
+            if abs(error) < 0.05:
+                self.stop_robot()
+                return True, 'Turn complete'
+
+            turn_direction = 1.0 if error > 0.0 else -1.0
+            self.set_angular_velocity(turn_direction * abs(angular_speed))
+
+            time.sleep(sleep_dt)
+
+        self.stop_robot()
+        return False, 'ROS shutdown during turn'
+
     def execute_callback(self, goal_handle):
         self.get_logger().info('Executing door traversal action.')
 
@@ -182,11 +253,38 @@ class DoorBehaviorServer(Node):
         forward_speed = goal.forward_speed if goal.forward_speed > 0.0 else self.forward_speed_default
 
         try:
+            # Turn around so the robot can move "backward" using forward motion.
+            ok, msg = self.turn_relative_angle(
+                angle_rad=math.pi,
+                angular_speed=self.turn_speed_default,
+                goal_handle=goal_handle,
+                state_name='TURNING_AROUND_TO_BACK_UP'
+            )
+            if not ok:
+                result = DoorTraverse.Result()
+                result.success = False
+                result.message = msg
+                return result
+
+            # Drive forward while facing away from the door.
             ok, msg = self.drive_linear_distance(
-                speed=-abs(backup_speed),
+                speed=abs(backup_speed),
                 target_distance=backup_distance,
                 goal_handle=goal_handle,
-                state_name='BACKING_UP'
+                state_name='DRIVING_AWAY_FROM_DOOR'
+            )
+            if not ok:
+                result = DoorTraverse.Result()
+                result.success = False
+                result.message = msg
+                return result
+
+            # Turn back to face the original door direction.
+            ok, msg = self.turn_relative_angle(
+                angle_rad=math.pi,
+                angular_speed=self.turn_speed_default,
+                goal_handle=goal_handle,
+                state_name='TURNING_BACK_TO_DOOR'
             )
             if not ok:
                 result = DoorTraverse.Result()
