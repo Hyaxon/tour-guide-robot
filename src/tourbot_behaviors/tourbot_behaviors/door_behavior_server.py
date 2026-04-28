@@ -16,6 +16,8 @@ from nav_msgs.msg import Odometry
 
 from tourbot_interfaces.action import DoorTraverse
 
+turn_speed_default = 0.8
+
 class DoorBehaviorServer(Node):
     def __init__(self) -> None:
         super().__init__('door_behavior_server')
@@ -30,7 +32,7 @@ class DoorBehaviorServer(Node):
         self.declare_parameter('wait_seconds_default', 3.0)
         self.declare_parameter('forward_distance_default', 1.5)
         self.declare_parameter('forward_speed_default', 0.18)
-        self.declare_parameter('turn_speed_default', 0.8)
+        #self.declare_parameter('turn_speed_default', 0.8)
 
         self.declare_parameter('control_rate_hz', 20.0)
 
@@ -47,7 +49,7 @@ class DoorBehaviorServer(Node):
 
         #self.cmd_pub = self.create_publisher(Twist, cmd_vel_topic, 10)
         self.cmd_pub = self.create_publisher(TwistStamped, cmd_vel_topic, 10)
-        
+
         self.odom_sub = self.create_subscription(
             Odometry,
             odom_topic,
@@ -256,7 +258,7 @@ class DoorBehaviorServer(Node):
             # Turn around so the robot can move "backward" using forward motion.
             ok, msg = self.turn_relative_angle(
                 angle_rad=math.pi,
-                angular_speed=self.turn_speed_default,
+                angular_speed=turn_speed_default,
                 goal_handle=goal_handle,
                 state_name='TURNING_AROUND_TO_BACK_UP'
             )
@@ -282,7 +284,7 @@ class DoorBehaviorServer(Node):
             # Turn back to face the original door direction.
             ok, msg = self.turn_relative_angle(
                 angle_rad=math.pi,
-                angular_speed=self.turn_speed_default,
+                angular_speed=turn_speed_default,
                 goal_handle=goal_handle,
                 state_name='TURNING_BACK_TO_DOOR'
             )
