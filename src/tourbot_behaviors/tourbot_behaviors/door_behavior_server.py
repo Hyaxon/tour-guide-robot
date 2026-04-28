@@ -16,7 +16,7 @@ from nav_msgs.msg import Odometry
 
 from tourbot_interfaces.action import DoorTraverse
 
-turn_speed_default = 0.8
+turn_speed_default = 0.1
 
 class DoorBehaviorServer(Node):
     def __init__(self) -> None:
