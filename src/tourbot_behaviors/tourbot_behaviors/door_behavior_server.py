@@ -44,7 +44,7 @@ class DoorBehaviorServer(Node):
         self.forward_speed_default = float(self.get_parameter('forward_speed_default').value)
 
         #self.cmd_pub = self.create_publisher(Twist, cmd_vel_topic, 10)
-        self.cmd_pub = self.create_publisher(TwistStamped, cmd_vel_topic, 10)
+        self.cmd_pub = self.create_publisher(TwistStamped, "/cmd_vel", 10)
 
         self.odom_sub = self.create_subscription(
             Odometry,
