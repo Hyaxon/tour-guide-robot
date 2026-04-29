@@ -14,19 +14,30 @@ def generate_launch_description():
         'map_area.yaml'
     )
 
-    turtlebot4_nav_launch = IncludeLaunchDescription(
+    localization_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
                 get_package_share_directory('turtlebot4_navigation'),
                 'launch',
-                'nav_bringup.launch.py'
+                'localization.launch.py'
             )
         ),
         launch_arguments={
-            'nav2': 'true',
-            'slam': 'false',
-            'localization': 'true',
             'map': map_yaml,
+            'use_sim_time': 'false',
+        }.items()
+    )
+
+    nav2_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('turtlebot4_navigation'),
+                'launch',
+                'nav2.launch.py'
+            )
+        ),
+        launch_arguments={
+            'use_sim_time': 'false',
         }.items()
     )
 
@@ -41,6 +52,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        turtlebot4_nav_launch,
-        view_navigation_launch,    
+        localization_launch,
+        nav2_launch,
+        view_navigation_launch,
     ])
