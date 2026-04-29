@@ -7,6 +7,7 @@ import os
 
 
 def generate_launch_description():
+    # Path to predefined map
     map_yaml = os.path.join(
         get_package_share_directory('tourbot_bringup'),
         'maps',
@@ -14,33 +15,7 @@ def generate_launch_description():
         'map_area.yaml'
     )
 
-    localization_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('turtlebot4_navigation'),
-                'launch',
-                'localization.launch.py'
-            )
-        ),
-        launch_arguments={
-            'map': map_yaml,
-            'use_sim_time': 'false',
-        }.items()
-    )
-
-    nav2_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('turtlebot4_navigation'),
-                'launch',
-                'nav2.launch.py'
-            )
-        ),
-        launch_arguments={
-            'use_sim_time': 'false',
-        }.items()
-    )
-
+    # Launch rviz2 in navigation mode
     view_navigation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
@@ -51,8 +26,24 @@ def generate_launch_description():
         )
     )
 
+    # Localize TurtleBot4 using predefined map instead of running SLAM
+    localization_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('turtlebot4_navigation'),
+                'launch',
+                'localization.launch.py'
+            )
+        ),
+        launch_arguments={
+            'map': map_yaml,
+        }.items()
+    )
+
+    # Launches the controller node
+    
+
     return LaunchDescription([
-        localization_launch,
-        nav2_launch,
         view_navigation_launch,
+        localization_launch
     ])
