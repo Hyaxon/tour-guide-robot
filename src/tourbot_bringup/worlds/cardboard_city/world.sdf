@@ -149,6 +149,28 @@
         </include>
 
         <!-- These walls establish the location of the simulation based on the project -->
-        
+        <!-- Left Wall -->
+        <model name="wall_1">
+        <static>true</static>
+
+        </model>
+
+        <!-- Right Wall -->
+        <model name="wall_2">
+        <static>true</static>
+
+        </model>
+
+        <!-- Top Wall -->
+        <model name="wall_3">
+        <static>true</static>
+
+        </model>
+
+        <!-- Bottom Wall -->
+        <model name="wall_4">
+        <static>true</static>
+
+        </model>
     </world>
 </sdf>
