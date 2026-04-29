@@ -53,6 +53,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         view_navigation_launch,
-        #localization_launch,
+        localization_launch,
         nav2_launch
     ])
