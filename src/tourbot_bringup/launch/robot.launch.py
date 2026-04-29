@@ -16,15 +16,15 @@ def generate_launch_description():
     )
 
     # Launch rviz2 in navigation mode
-    view_navigation_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('turtlebot4_viz'),
-                'launch',
-                'view_navigation.launch.py'
-            )
-        )
-    )
+    #view_navigation_launch = IncludeLaunchDescription(
+    #    PythonLaunchDescriptionSource(
+    #        os.path.join(
+    #            get_package_share_directory('turtlebot4_viz'),
+    #            'launch',
+    #            'view_navigation.launch.py'
+    #        )
+    #    )
+    #)
 
     # Localize TurtleBot4 using predefined map instead of running SLAM
     localization_launch = IncludeLaunchDescription(
