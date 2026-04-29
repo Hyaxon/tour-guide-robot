@@ -1,13 +1,11 @@
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, LogInfo
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 import os
 
 
 def generate_launch_description():
-    # Path to predefined map
     map_yaml = os.path.join(
         get_package_share_directory('tourbot_bringup'),
         'maps',
@@ -15,44 +13,22 @@ def generate_launch_description():
         'map_area.yaml'
     )
 
-    # Launch rviz2 in navigation mode
-    view_navigation_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('turtlebot4_viz'),
-                'launch',
-                'view_navigation.launch.py'
-            )
-        )
-    )
-
-    # Localize TurtleBot4 using predefined map instead of running SLAM
-    localization_launch = IncludeLaunchDescription(
+    nav_bringup_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
                 get_package_share_directory('turtlebot4_navigation'),
                 'launch',
-                'localization.launch.py'
+                'nav_bringup.launch.py'
             )
         ),
         launch_arguments={
+            'slam': 'off',
+            'localization': 'true',
             'map': map_yaml,
         }.items()
     )
 
-    nav2_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                get_package_share_directory('turtlebot4_navigation'),
-                'launch',
-                'nav2.launch.py'
-            )
-        )
-    )
-    
-
     return LaunchDescription([
-        view_navigation_launch,
-        localization_launch,
-        nav2_launch
+        LogInfo(msg=['Using map: ', map_yaml]),
+        nav_bringup_launch,
     ])
