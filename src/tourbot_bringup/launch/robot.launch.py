@@ -40,10 +40,19 @@ def generate_launch_description():
         }.items()
     )
 
-    # Launches the controller node
+    nav2_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory('turtlebot4_navigation'),
+                'launch',
+                'nav2.launch.py'
+            )
+        )
+    )
     
 
     return LaunchDescription([
         view_navigation_launch,
-        localization_launch
+        localization_launch,
+        nav2_launch
     ])
