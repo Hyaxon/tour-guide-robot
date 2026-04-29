@@ -41,15 +41,9 @@ def generate_launch_description():
     )
 
     # Launches the controller node
-    controller_node = Node(
-        package='project2_control',
-        executable='project2_controller',
-        name='project2_controller',
-        output='screen',
-    )
+    
 
     return LaunchDescription([
-        controller_node,
         view_navigation_launch,
         localization_launch
     ])
