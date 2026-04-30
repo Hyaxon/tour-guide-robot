@@ -25,7 +25,7 @@ def main():
 
     navigator = TurtleBot4Navigator()
 
-    map_name = "default"
+    map_name = "cardboard_city"
     landmark_data = load_landmarks(map_name)
 
     # Start on dock
