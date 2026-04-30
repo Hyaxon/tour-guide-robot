@@ -29,9 +29,9 @@ def main():
     landmark_data = load_landmarks(map_name)
 
     # Start on dock
-    if not navigator.getDockedStatus():
-        navigator.info('Docking before intialising pose')
-        navigator.dock()
+    #if not navigator.getDockedStatus():
+    #    navigator.info('Docking before intialising pose')
+    #    navigator.dock()
 
     # Set initial pose
     initial_pose_data = landmark_data["home"]
