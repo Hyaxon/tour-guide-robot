@@ -40,6 +40,12 @@ def generate_launch_description():
         }.items()
     )
 
+    nav2_params = os.path.join(
+        get_package_share_directory('tourbot_bringup'),
+        'config',
+        'nav2_params.yaml'
+    )
+    
     nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(
@@ -47,7 +53,10 @@ def generate_launch_description():
                 'launch',
                 'nav2.launch.py'
             )
-        )
+        ),
+        launch_arguments={
+            'params': nav2_params,
+        }.items()
     )
     
 
