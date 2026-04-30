@@ -47,12 +47,12 @@ def main():
         goal_poses.append(landmark_to_pose(navigator, landmark))
 
     # Undock
-    navigator.undock()
+    #navigator.undock()
 
     # Go to each goal pose
     navigator.startThroughPoses(goal_poses)
 
-    navigator.dock()
+    #navigator.dock()
 
     rclpy.shutdown()
 
