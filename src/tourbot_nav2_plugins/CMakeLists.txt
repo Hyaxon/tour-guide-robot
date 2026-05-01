@@ -12,7 +12,7 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(tourbot_interface REQUIRED)
+find_package(tourbot_interfaces REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
