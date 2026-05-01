@@ -43,7 +43,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             'map': map_yaml,
-            #'params': nav2_params,
+            'params_file': nav2_params,
         }.items()
     )
 
