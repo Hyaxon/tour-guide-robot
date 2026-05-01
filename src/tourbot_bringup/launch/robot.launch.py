@@ -15,6 +15,12 @@ def generate_launch_description():
         'map_area.yaml'
     )
 
+    nav2_params = os.path.join(
+        get_package_share_directory('tourbot_bringup'),
+        'config',
+        'nav2_params.yaml'
+    )
+
     # Launch rviz2 in navigation mode
     view_navigation_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -37,14 +43,10 @@ def generate_launch_description():
         ),
         launch_arguments={
             'map': map_yaml,
+            #'params': nav2_params,
         }.items()
     )
 
-    nav2_params = os.path.join(
-        get_package_share_directory('tourbot_bringup'),
-        'config',
-        'nav2_params.yaml'
-    )
     
     nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
