@@ -81,13 +81,13 @@ def main():
     #navigator.undock()
 
     # Go to each goal pose
-    for goal_pose in goal_poses:
-        navigator.startToPose(goal_pose)
+    # Go through all waypoints using Nav2 waypoint_follower
+    navigator.followWaypoints(goal_poses)
 
-        while not navigator.isTaskComplete():
-            rclpy.spin_once(navigator, timeout_sec=0.1)
+    while not navigator.isTaskComplete():
+        rclpy.spin_once(navigator, timeout_sec=0.1)
 
-        navigator.info("Reached landmark")
+    navigator.info("Tour complete")
 
 
     #navigator.dock()
