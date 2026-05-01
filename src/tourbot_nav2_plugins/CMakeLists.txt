@@ -15,7 +15,7 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(nav2_core REQUIRED)
 find_package(geometry_msgs REQUIRED)
-find_package(tourbot_interface REQUIRED)
+find_package(tourbot_interfaces REQUIRED)
 
 include_directories(include)
 
@@ -30,7 +30,7 @@ ament_target_dependencies(${PROJECT_NAME}
   pluginlib
   nav2_core
   geometry_msgs
-  tourbot_interface
+  tourbot_interfaces
 )
 
 pluginlib_export_plugin_description_file(nav2_core plugin.xml)
