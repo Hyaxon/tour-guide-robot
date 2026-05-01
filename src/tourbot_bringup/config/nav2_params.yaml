@@ -313,11 +313,15 @@ waypoint_follower:
     loop_rate: 20
     stop_on_failure: false
     action_server_result_timeout: 900.0
-    waypoint_task_executor_plugin: "wait_at_waypoint"
-    wait_at_waypoint:
-      plugin: "nav2_waypoint_follower::WaitAtWaypoint"
-      enabled: True
-      waypoint_pause_duration: 200
+
+    waypoint_task_executor_plugin: "landmark_task_executor"
+
+    landmark_task_executor:
+      plugin: "tourbot_nav2_plugins::LandmarkTaskExecutor"
+      enabled: true
+      action_name: "/tourbot/do_landmark_task"
+      server_timeout_sec: 5.0
+      result_timeout_sec: 120.0
 
 collision_monitor:
   ros__parameters:
