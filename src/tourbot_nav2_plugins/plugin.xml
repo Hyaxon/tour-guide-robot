@@ -1,0 +1,10 @@
+<library path="tourbot_nav2_plugins">
+  <class
+    name="tourbot_nav2_plugins::LandmarkTaskExecutor"
+    type="tourbot_nav2_plugins::LandmarkTaskExecutor"
+    base_class_type="nav2_core::WaypointTaskExecutor">
+    <description>
+      Calls TourBot's landmark task action server when Nav2 reaches each waypoint.
+    </description>
+  </class>
+</library>

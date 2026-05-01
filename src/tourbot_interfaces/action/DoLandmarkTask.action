@@ -1,0 +1,9 @@
+int32 waypoint_index
+string expected_landmark_name
+int32 expected_tag_id
+---
+bool success
+int32 detected_tag_id
+string message
+---
+string status
