@@ -82,7 +82,10 @@ def main():
 
     # Go to each goal pose
     # Go through all waypoints using Nav2 waypoint_follower
-    navigator.followWaypoints(goal_poses)
+    navigator.startThroughGoals(goal_poses)
+
+    for goal_pose in goal_poses:
+        navigator.startToPose(goal_pose)
 
     while not navigator.isTaskComplete():
         rclpy.spin_once(navigator, timeout_sec=0.1)
