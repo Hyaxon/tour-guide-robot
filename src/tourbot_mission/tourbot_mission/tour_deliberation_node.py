@@ -1,4 +1,5 @@
 import rclpy
+import time 
 
 from turtlebot4_navigation.turtlebot4_navigator import (
     TurtleBot4Directions,
@@ -102,8 +103,12 @@ def main():
         goal_pose = landmark_to_pose(navigator, landmark)
         navigator.startToPose(goal_pose)
 
+        time.sleep(5.0)
+
         rotated_pose = landmark_to_rotated_pose(navigator, landmark)
         navigator.startToPose(rotated_pose)
+
+        time.sleep(5.0)
 
     navigator.info("Tour complete")
 
