@@ -20,3 +20,6 @@ ros2 service call /reset_pose irobot_create_msgs/srv/ResetPose "pose:
     y: 0.0
     z: 0.0
     w: 1.0"
+
+    ros2 service call /slam_toolbox/save_map slam_toolbox/srv/SaveMap "name:
+  data: 'cardboard_city'"
