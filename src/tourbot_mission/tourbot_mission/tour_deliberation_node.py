@@ -7,6 +7,7 @@ from turtlebot4_navigation.turtlebot4_navigator import (
 
 from tourbot_landmarks.landmarks_loader import load_landmarks
 
+
 def to_direction(direction_name: str):
     try:
         return getattr(TurtleBot4Directions, direction_name)
@@ -14,10 +15,24 @@ def to_direction(direction_name: str):
         raise ValueError(f"Invalid direction '{direction_name}' in landmarks.yaml") from e
 
 
+def direction_to_degrees(direction_name: str) -> float:
+    return float(to_direction(direction_name))
+
+
 def landmark_to_pose(navigator: TurtleBot4Navigator, landmark: dict):
     return navigator.getPoseStamped(
         [float(landmark["x"]), float(landmark["y"])],
-        to_direction(landmark["theta"])
+        direction_to_degrees(landmark["theta"])
+    )
+
+
+def landmark_to_rotated_pose(navigator: TurtleBot4Navigator, landmark: dict):
+    theta = direction_to_degrees(landmark["theta"])
+    rotated_theta = (theta + 180.0) % 360.0
+
+    return navigator.getPoseStamped(
+        [float(landmark["x"]), float(landmark["y"])],
+        rotated_theta
     )
 
 
@@ -61,33 +76,34 @@ def main():
     for landmark in landmark_data["landmarks"]:
         landmark_raw_data.append(landmark)
 
-    goal_poses = []
-    last_landmark = landmark_data['home']
+    goal_landmarks = []
+    last_landmark = landmark_data["home"]
+
     while landmark_raw_data:
         nearest_landmark = get_nearest_landmark(
-            last_landmark['x'], 
-            last_landmark['y'], 
+            last_landmark["x"],
+            last_landmark["y"],
             landmark_raw_data
         )
 
-        goal_poses.append(landmark_to_pose(navigator, landmark_raw_data[nearest_landmark]))
-        last_landmark = landmark_raw_data.pop(nearest_landmark)
+        next_landmark = landmark_raw_data.pop(nearest_landmark)
+        goal_landmarks.append(next_landmark)
+        last_landmark = next_landmark
 
     # Return home to end the tour
-    goal_poses.append(initial_pose)
-
+    goal_landmarks.append(landmark_data["home"])
 
     # Undock
     #navigator.undock()
 
     # Go to each goal pose
     # Go through all waypoints using Nav2 waypoint_follower
-
-    for goal_pose in goal_poses:
+    for landmark in goal_landmarks:
+        goal_pose = landmark_to_pose(navigator, landmark)
         navigator.startToPose(goal_pose)
 
-    while not navigator.isTaskComplete():
-        rclpy.spin_once(navigator, timeout_sec=0.1)
+        rotated_pose = landmark_to_rotated_pose(navigator, landmark)
+        navigator.startToPose(rotated_pose)
 
     navigator.info("Tour complete")
 
