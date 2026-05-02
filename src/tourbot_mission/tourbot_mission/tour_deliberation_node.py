@@ -1,5 +1,7 @@
 import rclpy
 import time 
+from rclpy.action import ActionClient
+from tourbot_interfaces.action import AlignToAprilTag
 
 from turtlebot4_navigation.turtlebot4_navigator import (
     TurtleBot4Directions,
@@ -49,7 +51,69 @@ def get_nearest_landmark(l1x, l1y, landmark_raw_data):
             nearest_dist = dist
 
     return nearest_landmark
+def call_action_and_wait(navigator, action_client, goal_msg):
+    navigator.info("Waiting for action server...")
 
+    if not action_client.wait_for_server(timeout_sec=10.0):
+        navigator.error("Action server not available")
+        return False
+
+    navigator.info("Sending action goal...")
+
+    send_goal_future = action_client.send_goal_async(goal_msg)
+
+    while not send_goal_future.done():
+        rclpy.spin_once(navigator, timeout_sec=0.1)
+
+    goal_handle = send_goal_future.result()
+
+    if not goal_handle.accepted:
+        navigator.error("Action goal was rejected")
+        return False
+
+    navigator.info("Action goal accepted. Waiting for result...")
+
+    result_future = goal_handle.get_result_async()
+
+    while not result_future.done():
+        rclpy.spin_once(navigator, timeout_sec=0.1)
+
+    result = result_future.result()
+
+    navigator.info("Action completed")
+    return True
+
+def call_action_and_wait(navigator, action_client, goal_msg):
+    navigator.info("Waiting for action server...")
+
+    if not action_client.wait_for_server(timeout_sec=10.0):
+        navigator.error("Action server not available")
+        return False
+
+    navigator.info("Sending action goal...")
+
+    send_goal_future = action_client.send_goal_async(goal_msg)
+
+    while not send_goal_future.done():
+        rclpy.spin_once(navigator, timeout_sec=0.1)
+
+    goal_handle = send_goal_future.result()
+
+    if not goal_handle.accepted:
+        navigator.error("Action goal was rejected")
+        return False
+
+    navigator.info("Action goal accepted. Waiting for result...")
+
+    result_future = goal_handle.get_result_async()
+
+    while not result_future.done():
+        rclpy.spin_once(navigator, timeout_sec=0.1)
+
+    result = result_future.result()
+
+    navigator.info("Action completed")
+    return True
 
 def main():
     rclpy.init()
@@ -59,6 +123,12 @@ def main():
     map_name = "cardboard_city"
     landmark_data = load_landmarks(map_name)
 
+    action_client = ActionClient(
+        navigator,
+        AlignToAprilTag,
+        "align_to_april_tag"
+    )
+    
     # Start on dock
     #if not navigator.getDockedStatus():
     #    navigator.info('Docking before intialising pose')
