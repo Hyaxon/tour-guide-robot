@@ -57,7 +57,7 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            'params': nav2_params,
+            'params_file': nav2_params,
         }.items()
     )
     
