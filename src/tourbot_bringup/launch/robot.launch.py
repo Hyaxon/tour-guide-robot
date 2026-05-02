@@ -18,7 +18,7 @@ def generate_launch_description():
     nav2_params = os.path.join(
         get_package_share_directory('tourbot_bringup'),
         'config',
-        'nav2_params_old.yaml'
+        'nav2_test_help.yaml'
     )
 
     # Launch rviz2 in navigation mode
