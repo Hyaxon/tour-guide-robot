@@ -167,7 +167,7 @@ def main():
         goal_pose = landmark_to_pose(navigator, landmark)
         navigator.startToPose(goal_pose)
 
-        time.sleep(5.0)
+        time.sleep(1.5)
 
         align_goal = AlignToAprilTag.Goal()
         align_goal.tag_id = int(landmark["tag_id"])
