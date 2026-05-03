@@ -19,7 +19,7 @@ class AlignToAprilTagServer(Node):
     def __init__(self):
         super().__init__("align_to_apriltag_server")
 
-        self.declare_parameter("detections_topic", "/apriltag/detections")
+        self.declare_parameter("detections_topic", "/detections")
         self.declare_parameter("camera_info_topic", "/oakd/rgb/preview/camera_info")
         self.declare_parameter("cmd_vel_topic", "/cmd_vel")
 
