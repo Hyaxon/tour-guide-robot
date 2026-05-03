@@ -25,6 +25,6 @@ ros2 service call /reset_pose irobot_create_msgs/srv/ResetPose "pose:
   data: 'cardboard_city'"
 
 
-  ros2 action send_goal /align_to_apriltag tourbot_interfaces/action/AlignToAprilTag \
-"{tag_id: 10, timeout_sec: 10.0, x_tolerance_px: 20.0, search_angular_speed: 0.2, align_kp: 0.003, max_angular_speed: 0.3}" \
+ros2 action send_goal /align_to_apriltag tourbot_interfaces/action/AlignToAprilTag \
+"{tag_id: 10, timeout_sec: 10.0, x_tolerance_px: 20.0}" \
 --feedback
