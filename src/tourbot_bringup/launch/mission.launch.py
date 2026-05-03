@@ -97,7 +97,7 @@ def generate_launch_description():
 
             # Start mission last so action servers are available before it sends goals.
             TimerAction(
-                period=6.0,
+                period=10.0,
                 actions=[tour_deliberation_node],
             ),
         ]
