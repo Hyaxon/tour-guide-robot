@@ -1,0 +1,15 @@
+# Goal
+int32 tag_id
+float32 timeout_sec
+float32 missing_duration_sec
+
+---
+# Result
+bool success
+string message
+
+---
+# Feedback
+bool tag_visible
+float32 missing_time_sec
+string state

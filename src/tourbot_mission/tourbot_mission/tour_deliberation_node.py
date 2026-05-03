@@ -3,6 +3,9 @@ import time
 from rclpy.action import ActionClient
 
 from tourbot_interfaces.action import AlignToAprilTag
+from tourbot_interfaces.action import WaitForTagRemoved
+from tourbot_interfaces.action import DoorTraverse
+
 from action_msgs.msg import GoalStatus
 
 from turtlebot4_navigation.turtlebot4_navigator import (
@@ -108,6 +111,53 @@ def call_action_and_wait(navigator, action_client, goal_msg):
     navigator.info(f"Action completed successfully: {result.message}")
     return True
 
+def is_door_tag(tag_id: int) -> bool:
+    return tag_id in (1, 2)
+
+
+def run_door_sequence(navigator, wait_client, door_client, landmark):
+    tag_id = int(landmark["tag_id"])
+
+    wait_goal = WaitForTagRemoved.Goal()
+    wait_goal.tag_id = tag_id
+    wait_goal.timeout_sec = 30.0
+
+    tag_removed = call_action_and_wait(
+        navigator,
+        wait_client,
+        wait_goal
+    )
+
+    if not tag_removed:
+        navigator.error(
+            f"Tag {tag_id} was not removed from FOV. Skipping door traversal."
+        )
+        return False
+
+    door_goal = DoorTraverse.Goal()
+
+    # Use your DoorTraverse defaults by leaving these as 0.0,
+    # assuming your action fields match the server code you showed.
+    door_goal.backup_distance = 0.0
+    door_goal.backup_speed = 0.0
+    door_goal.wait_seconds = 0.0
+    door_goal.forward_distance = 0.0
+    door_goal.forward_speed = 0.0
+
+    # If your DoorTraverse.action has a tag_id field, set it:
+    # door_goal.tag_id = tag_id
+
+    door_done = call_action_and_wait(
+        navigator,
+        door_client,
+        door_goal
+    )
+
+    if not door_done:
+        navigator.error(f"Door traversal failed for tag {tag_id}.")
+        return False
+
+    return True
 
 def main():
     rclpy.init()
@@ -118,6 +168,18 @@ def main():
         navigator,
         AlignToAprilTag,
         "align_to_apriltag"
+    )
+
+    wait_for_tag_removed_client = ActionClient(
+        navigator,
+        WaitForTagRemoved,
+        "wait_for_tag_removed"
+    )
+
+    door_traverse_client = ActionClient(
+        navigator,
+        DoorTraverse,
+        "door_traverse"
     )
 
     map_name = "cardboard_city"
@@ -169,8 +231,10 @@ def main():
 
         time.sleep(1.5)
 
+        tag_id = int(landmark["tag_id"])
+
         align_goal = AlignToAprilTag.Goal()
-        align_goal.tag_id = int(landmark["tag_id"])
+        align_goal.tag_id = tag_id
         align_goal.timeout_sec = 30.0
         align_goal.x_tolerance_px = 7.0
 
@@ -182,13 +246,31 @@ def main():
 
         if not aligned:
             navigator.error(
-                f"Failed to align to AprilTag {landmark['tag_id']}. Skipping rotation."
+                f"Failed to align to AprilTag {tag_id}. Skipping landmark."
             )
             continue
 
         time.sleep(1.0)
 
-        navigator.info("Alignment finished. Rotating 180 degrees now.")
+        if is_door_tag(tag_id):
+            navigator.info(
+                f"Tag {tag_id} is a door tag. Waiting for removal before traversal."
+            )
+
+            door_ok = run_door_sequence(
+                navigator,
+                wait_for_tag_removed_client,
+                door_traverse_client,
+                landmark
+            )
+
+            if not door_ok:
+                navigator.error(
+                    f"Door sequence failed for tag {tag_id}. Skipping rotation."
+                )
+                continue
+
+        navigator.info("Landmark interaction finished. Rotating 180 degrees now.")
 
         rotated_pose = landmark_to_rotated_pose(navigator, landmark)
         navigator.startToPose(rotated_pose)
