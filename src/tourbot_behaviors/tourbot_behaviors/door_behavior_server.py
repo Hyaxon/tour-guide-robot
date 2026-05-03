@@ -29,7 +29,11 @@ class DoorBehaviorServer(Node):
         self.declare_parameter("backup_distance_default", 0.9)
         self.declare_parameter("backup_speed_default", 0.15)
         self.declare_parameter("wait_seconds_default", 3.0)
-        self.declare_parameter("forward_distance_default", 1.5)
+
+        # This means "distance past the original door pose",
+        # not raw forward distance after backing up.
+        self.declare_parameter("forward_distance_default", 2.5)
+
         self.declare_parameter("forward_speed_default", 0.18)
         self.declare_parameter("control_rate_hz", 20.0)
 
@@ -115,10 +119,10 @@ class DoorBehaviorServer(Node):
 
     def get_door_defaults_for_tag(self, tag_id: int):
         if tag_id == 1:
-            # Outward door behavior.
+            # Outward door behavior: no backup, just wait then drive past door.
             return {
                 "door_type": "OUTWARD",
-                "backup_distance": 0,
+                "backup_distance": 0.0,
                 "backup_speed": self.backup_speed_default,
                 "wait_seconds": self.wait_seconds_default,
                 "forward_distance": self.forward_distance_default,
@@ -126,8 +130,7 @@ class DoorBehaviorServer(Node):
             }
 
         if tag_id == 2:
-            # Inward door behavior.
-            # Tune these differently if inward doors need a different animation.
+            # Inward door behavior: back up, wait, then drive through/past door.
             return {
                 "door_type": "INWARD",
                 "backup_distance": self.backup_distance_default,
@@ -238,6 +241,10 @@ class DoorBehaviorServer(Node):
         goal_handle,
         state_name: str,
     ) -> Tuple[bool, str]:
+        if target_distance <= 0.0:
+            self.stop_robot()
+            return True, "No motion requested"
+
         start_xy = self.get_xy()
 
         if start_xy is None:
@@ -346,7 +353,8 @@ class DoorBehaviorServer(Node):
             else door_defaults["wait_seconds"]
         )
 
-        forward_distance = (
+        # Semantics: forward_distance means desired distance past the original door pose.
+        forward_distance_past_door = (
             goal.forward_distance
             if goal.forward_distance > 0.0
             else door_defaults["forward_distance"]
@@ -361,13 +369,13 @@ class DoorBehaviorServer(Node):
         self.get_logger().info(
             f"Door traversal using tag_id={tag_id}, door_type={door_type}, "
             f"backup_distance={backup_distance}, backup_speed={backup_speed}, "
-            f"wait_seconds={wait_seconds}, forward_distance={forward_distance}, "
+            f"wait_seconds={wait_seconds}, "
+            f"forward_distance_past_door={forward_distance_past_door}, "
             f"forward_speed={forward_speed}"
         )
 
         try:
             if backup_distance > 0.0:
-                # Turn around so the robot can move "backward" using forward motion.
                 ok, msg = self.turn_relative_angle(
                     angle_rad=math.pi,
                     angular_speed=TURN_SPEED_DEFAULT,
@@ -378,7 +386,6 @@ class DoorBehaviorServer(Node):
                 if not ok:
                     return self.make_failed_result(goal_handle, msg)
 
-                # Drive forward while facing away from the door.
                 ok, msg = self.drive_linear_distance(
                     speed=abs(backup_speed),
                     target_distance=backup_distance,
@@ -389,7 +396,6 @@ class DoorBehaviorServer(Node):
                 if not ok:
                     return self.make_failed_result(goal_handle, msg)
 
-                # Turn back to face the original door direction.
                 ok, msg = self.turn_relative_angle(
                     angle_rad=math.pi,
                     angular_speed=TURN_SPEED_DEFAULT,
@@ -411,11 +417,21 @@ class DoorBehaviorServer(Node):
             if not ok:
                 return self.make_failed_result(goal_handle, msg)
 
+            actual_forward_distance = forward_distance_past_door
+
+            if backup_distance > 0.0:
+                actual_forward_distance = backup_distance + forward_distance_past_door
+
+            self.get_logger().info(
+                f"Driving forward {actual_forward_distance:.2f} m "
+                f"to end {forward_distance_past_door:.2f} m past the door."
+            )
+
             ok, msg = self.drive_linear_distance(
                 speed=abs(forward_speed),
-                target_distance=forward_distance,
+                target_distance=actual_forward_distance,
                 goal_handle=goal_handle,
-                state_name="DRIVING_FORWARD",
+                state_name="DRIVING_FORWARD_THROUGH_DOOR",
             )
 
             if not ok:

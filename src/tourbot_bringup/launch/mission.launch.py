@@ -22,47 +22,19 @@ def generate_launch_description():
     align_to_apriltag_server = Node(
         package="tourbot_behaviors",
         executable="align_to_apriltag_server",
-        name="align_to_apriltag_server",
-        output="screen",
-        parameters=[
-            {
-                "detections_topic": "/detections",
-                "camera_info_topic": "/oakd/rgb/preview/camera_info",
-                "cmd_vel_topic": "/cmd_vel",
-            }
-        ],
+        name="align_to_apriltag_server",    
     )
 
     wait_for_tag_removed_server = Node(
         package="tourbot_behaviors",
         executable="wait_for_tag_removed_server",
         name="wait_for_tag_removed_server",
-        output="screen",
-        parameters=[
-            {
-                "detections_topic": "/detections",
-                "control_rate_hz": 20.0,
-            }
-        ],
     )
 
     door_behavior_server = Node(
         package="tourbot_behaviors",
         executable="door_behavior_server",
         name="door_behavior_server",
-        output="screen",
-        parameters=[
-            {
-                "cmd_vel_topic": "/cmd_vel",
-                "odom_topic": "/odom",
-                "backup_distance_default": 0.9,
-                "backup_speed_default": 0.15,
-                "wait_seconds_default": 3.0,
-                "forward_distance_default": 1.5,
-                "forward_speed_default": 0.18,
-                "control_rate_hz": 20.0,
-            }
-        ],
     )
 
     # Main mission node
@@ -70,7 +42,6 @@ def generate_launch_description():
         package="tourbot_mission",
         executable="tour_deliberation_node",
         name="tour_deliberation_node",
-        output="screen",
     )
 
     return LaunchDescription(
