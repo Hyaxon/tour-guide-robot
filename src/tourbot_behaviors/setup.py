@@ -29,6 +29,7 @@ setup(
             'door_behavior_server = tourbot_behaviors.door_behavior_server:main',
             'manual_door_override_node = tourbot_behaviors.manual_door_override_node:main',
             'landmark_task_server = tourbot_behaviors.landmark_task_server:main',
+            'align_to_apriltag_server = tourbot_behaviors.align_to_apriltag_server:main',
         ],
     },
 )
