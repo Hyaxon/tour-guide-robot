@@ -28,14 +28,14 @@ landmarks:
   - name: goal_4
     tag_id: 4
     x: 1.33
-    y: -0.365
+    y: -0.2
     theta: EAST
 
   # Box 3 Right (Far from home)
   - name: goal_5
     tag_id: 5
     x: 3.36
-    y: -0.38
+    y: -0.2
     theta: EAST
 
   # Center Box Right Side 
