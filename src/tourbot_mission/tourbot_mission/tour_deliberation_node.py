@@ -186,8 +186,8 @@ def main():
             )
             continue
 
-        time.sleep(2.0)
-        
+        time.sleep(10.0)
+
         navigator.info("Alignment finished. Rotating 180 degrees now.")
 
         rotated_pose = landmark_to_rotated_pose(navigator, landmark)
