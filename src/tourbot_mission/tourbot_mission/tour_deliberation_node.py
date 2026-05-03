@@ -270,10 +270,11 @@ def main():
                 )
                 continue
 
-        navigator.info("Landmark interaction finished. Rotating 180 degrees now.")
+        if not is_door_tag(tag_id):
+            navigator.info("Landmark interaction finished. Rotating 180 degrees now.")
 
-        rotated_pose = landmark_to_rotated_pose(navigator, landmark)
-        navigator.startToPose(rotated_pose)
+            rotated_pose = landmark_to_rotated_pose(navigator, landmark)
+            navigator.startToPose(rotated_pose)
 
         time.sleep(5.0)
 
