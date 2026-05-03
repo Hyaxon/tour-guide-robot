@@ -22,7 +22,7 @@ landmarks:
     tag_id: 3
     x: 0.942
     y: 0.495
-    theta: WEST
+    theta: SOUTH
 
   # Box 2 Right (Less close to home)
   - name: goal_4
