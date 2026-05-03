@@ -63,7 +63,7 @@ def generate_launch_description():
     
 
     return LaunchDescription([
-        localization_launch,
         nav2_launch,
+        localization_launch,
         view_navigation_launch,
     ])
