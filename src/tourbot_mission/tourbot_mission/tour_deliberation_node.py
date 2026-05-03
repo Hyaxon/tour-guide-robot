@@ -172,7 +172,7 @@ def main():
         align_goal = AlignToAprilTag.Goal()
         align_goal.tag_id = int(landmark["tag_id"])
         align_goal.timeout_sec = 30.0
-        align_goal.x_tolerance_px = 20.0
+        align_goal.x_tolerance_px = 7.0
 
         aligned = call_action_and_wait(
             navigator,
@@ -180,13 +180,13 @@ def main():
             align_goal
         )
 
-        #if not aligned:
-        #    navigator.error(
-        #        f"Failed to align to AprilTag {landmark['tag_id']}. Skipping rotation."
-        #    )
-        #    continue
+        if not aligned:
+            navigator.error(
+                f"Failed to align to AprilTag {landmark['tag_id']}. Skipping rotation."
+            )
+            continue
 
-        time.sleep(10.0)
+        time.sleep(1.0)
 
         navigator.info("Alignment finished. Rotating 180 degrees now.")
 
