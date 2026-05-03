@@ -32,7 +32,7 @@ class DoorBehaviorServer(Node):
 
         # This means "distance past the original door pose",
         # not raw forward distance after backing up.
-        self.declare_parameter("forward_distance_default", 2.5)
+        self.declare_parameter("forward_distance_default", 3.25)
 
         self.declare_parameter("forward_speed_default", 0.18)
         self.declare_parameter("control_rate_hz", 20.0)
