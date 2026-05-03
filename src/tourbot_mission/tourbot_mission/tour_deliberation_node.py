@@ -1,7 +1,8 @@
 import rclpy
-import time 
+import time
 from rclpy.action import ActionClient
-#from tourbot_interfaces.action import AlignToAprilTag
+
+from tourbot_interfaces.action import AlignToAprilTag
 
 from turtlebot4_navigation.turtlebot4_navigator import (
     TurtleBot4Directions,
@@ -51,37 +52,7 @@ def get_nearest_landmark(l1x, l1y, landmark_raw_data):
             nearest_dist = dist
 
     return nearest_landmark
-def call_action_and_wait(navigator, action_client, goal_msg):
-    navigator.info("Waiting for action server...")
 
-    if not action_client.wait_for_server(timeout_sec=10.0):
-        navigator.error("Action server not available")
-        return False
-
-    navigator.info("Sending action goal...")
-
-    send_goal_future = action_client.send_goal_async(goal_msg)
-
-    while not send_goal_future.done():
-        rclpy.spin_once(navigator, timeout_sec=0.1)
-
-    goal_handle = send_goal_future.result()
-
-    if not goal_handle.accepted:
-        navigator.error("Action goal was rejected")
-        return False
-
-    navigator.info("Action goal accepted. Waiting for result...")
-
-    result_future = goal_handle.get_result_async()
-
-    while not result_future.done():
-        rclpy.spin_once(navigator, timeout_sec=0.1)
-
-    result = result_future.result()
-
-    navigator.info("Action completed")
-    return True
 
 def call_action_and_wait(navigator, action_client, goal_msg):
     navigator.info("Waiting for action server...")
@@ -110,25 +81,31 @@ def call_action_and_wait(navigator, action_client, goal_msg):
     while not result_future.done():
         rclpy.spin_once(navigator, timeout_sec=0.1)
 
-    result = result_future.result()
+    result_response = result_future.result()
+    result = result_response.result
 
-    navigator.info("Action completed")
+    if not result.success:
+        navigator.error(f"Action failed: {result.message}")
+        return False
+
+    navigator.info(f"Action completed: {result.message}")
     return True
+
 
 def main():
     rclpy.init()
 
     navigator = TurtleBot4Navigator()
 
+    align_client = ActionClient(
+        navigator,
+        AlignToAprilTag,
+        "align_to_apriltag"
+    )
+
     map_name = "cardboard_city"
     landmark_data = load_landmarks(map_name)
 
-    #action_client = ActionClient(
-    #    navigator,
-    #    AlignToAprilTag,
-    #    "align_to_april_tag"
-    #)
-    
     # Start on dock
     #if not navigator.getDockedStatus():
     #    navigator.info('Docking before intialising pose')
@@ -175,7 +152,22 @@ def main():
 
         time.sleep(5.0)
 
-        # TODO: CUSTOM LANDMARK INTERACTION (e.g. align to tag, door interaction, etc.)
+        align_goal = AlignToAprilTag.Goal()
+        align_goal.tag_id = int(landmark["tag_id"])
+        align_goal.timeout_sec = 10.0
+        align_goal.x_tolerance_px = 20.0
+
+        aligned = call_action_and_wait(
+            navigator,
+            align_client,
+            align_goal
+        )
+
+        if not aligned:
+            navigator.error(
+                f"Failed to align to AprilTag {landmark['tag_id']}. Skipping rotation."
+            )
+            continue
 
         rotated_pose = landmark_to_rotated_pose(navigator, landmark)
         navigator.startToPose(rotated_pose)
