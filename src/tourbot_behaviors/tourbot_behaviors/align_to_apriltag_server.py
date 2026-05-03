@@ -27,7 +27,7 @@ class AlignToAprilTagServer(Node):
 
         self.declare_parameter("detections_topic", "/detections")
         self.declare_parameter("camera_info_topic", "/oakd/rgb/preview/camera_info")
-        self.declare_parameter("cmd_vel_topic", "/cmd_vel_stamped")
+        self.declare_parameter("cmd_vel_topic", "/cmd_vel")
 
         detections_topic = self.get_parameter("detections_topic").value
         camera_info_topic = self.get_parameter("camera_info_topic").value
