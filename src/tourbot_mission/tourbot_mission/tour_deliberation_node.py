@@ -120,7 +120,8 @@ def run_door_sequence(navigator, wait_client, door_client, landmark):
 
     wait_goal = WaitForTagRemoved.Goal()
     wait_goal.tag_id = tag_id
-    wait_goal.timeout_sec = 30.0
+    wait_goal.timeout_sec = 60.0
+    wait_goal.missing_duration_sec = 3.0
 
     tag_removed = call_action_and_wait(
         navigator,
@@ -145,7 +146,7 @@ def run_door_sequence(navigator, wait_client, door_client, landmark):
     door_goal.forward_speed = 0.0
 
     # If your DoorTraverse.action has a tag_id field, set it:
-    # door_goal.tag_id = tag_id
+    door_goal.tag_id = tag_id
 
     door_done = call_action_and_wait(
         navigator,
