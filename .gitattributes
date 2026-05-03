@@ -1,0 +1,4 @@
+# Ignore the external libraries folder for language stats
+src/apriltag/** linguist-vendored
+src/apriltag_ros/** linguist-vendored
+src/apriltag_msgs/** linguist-vendored
