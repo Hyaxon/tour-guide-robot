@@ -169,6 +169,8 @@ def main():
             )
             continue
 
+        time.sleep(5.0)
+        
         rotated_pose = landmark_to_rotated_pose(navigator, landmark)
         navigator.startToPose(rotated_pose)
 
