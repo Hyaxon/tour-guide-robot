@@ -11,6 +11,9 @@ from sensor_msgs.msg import CameraInfo
 from apriltag_msgs.msg import AprilTagDetectionArray
 from tourbot_interfaces.action import AlignToAprilTag
 
+SEARCH_ANGULAR_SPEED = 0.20
+ALIGN_KP = 0.003
+MAX_ANGULAR_SPEED = 0.30
 
 class AlignToAprilTagServer(Node):
     def __init__(self):
@@ -138,7 +141,7 @@ class AlignToAprilTagServer(Node):
                 feedback.state = "searching_for_tag"
                 goal_handle.publish_feedback(feedback)
 
-                twist.angular.z = float(goal.search_angular_speed)
+                twist.angular.z = SEARCH_ANGULAR_SPEED
                 self.cmd_vel_pub.publish(twist)
 
                 time.sleep(sleep_time)
@@ -165,11 +168,11 @@ class AlignToAprilTagServer(Node):
             feedback.state = "aligning"
             goal_handle.publish_feedback(feedback)
 
-            angular_z = -goal.align_kp * x_error
+            angular_z = -ALIGN_KP * x_error
             angular_z = self.clamp(
                 angular_z,
-                -goal.max_angular_speed,
-                goal.max_angular_speed,
+                -MAX_ANGULAR_SPEED,
+                MAX_ANGULAR_SPEED,
             )
 
             twist.angular.z = angular_z
