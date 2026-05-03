@@ -194,7 +194,11 @@ def main():
     # Set initial pose
     initial_pose_data = landmark_data["home"]
     initial_pose = landmark_to_pose(navigator, initial_pose_data)
-    navigator.setInitialPose(initial_pose)
+
+    for _ in range(10):
+        navigator.setInitialPose(initial_pose)
+        rclpy.spin_once(navigator, timeout_sec=0.1)
+        time.sleep(0.1)
 
     # Wait for Nav2
     navigator.waitUntilNav2Active()
