@@ -33,7 +33,7 @@ landmarks:
     tag_id: 5
     x: 3.36
     y: -0.38
-    theta: SOUTH_WEST
+    theta: EAST
 
   - name: goal_6
     tag_id: 6
