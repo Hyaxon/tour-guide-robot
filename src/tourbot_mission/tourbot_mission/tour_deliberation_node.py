@@ -123,11 +123,11 @@ def main():
     map_name = "cardboard_city"
     landmark_data = load_landmarks(map_name)
 
-    action_client = ActionClient(
-        navigator,
-        AlignToAprilTag,
-        "align_to_april_tag"
-    )
+    #action_client = ActionClient(
+    #    navigator,
+    #    AlignToAprilTag,
+    #    "align_to_april_tag"
+    #)
     
     # Start on dock
     #if not navigator.getDockedStatus():
