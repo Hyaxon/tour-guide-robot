@@ -1,4 +1,4 @@
-image: cardboard_city.pgm
+image: map_area.pgm
 mode: trinary
 resolution: 0.050
 origin: [-8.254, -2.080, 0]
