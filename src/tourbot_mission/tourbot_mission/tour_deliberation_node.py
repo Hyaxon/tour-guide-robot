@@ -3,6 +3,7 @@ import time
 from rclpy.action import ActionClient
 
 from tourbot_interfaces.action import AlignToAprilTag
+from action_msgs.msg import GoalStatus
 
 from turtlebot4_navigation.turtlebot4_navigator import (
     TurtleBot4Directions,
@@ -65,10 +66,14 @@ def call_action_and_wait(navigator, action_client, goal_msg):
 
     send_goal_future = action_client.send_goal_async(goal_msg)
 
-    while not send_goal_future.done():
+    while rclpy.ok() and not send_goal_future.done():
         rclpy.spin_once(navigator, timeout_sec=0.1)
 
     goal_handle = send_goal_future.result()
+
+    if goal_handle is None:
+        navigator.error("Action goal response was None")
+        return False
 
     if not goal_handle.accepted:
         navigator.error("Action goal was rejected")
@@ -78,17 +83,29 @@ def call_action_and_wait(navigator, action_client, goal_msg):
 
     result_future = goal_handle.get_result_async()
 
-    while not result_future.done():
+    while rclpy.ok() and not result_future.done():
         rclpy.spin_once(navigator, timeout_sec=0.1)
 
     result_response = result_future.result()
-    result = result_response.result
 
-    if not result.success:
-        navigator.error(f"Action failed: {result.message}")
+    if result_response is None:
+        navigator.error("Action result response was None")
         return False
 
-    navigator.info(f"Action completed: {result.message}")
+    result = result_response.result
+    status = result_response.status
+
+    if status != GoalStatus.STATUS_SUCCEEDED:
+        navigator.error(
+            f"Action did not succeed. Status={status}, message={result.message}"
+        )
+        return False
+
+    if not result.success:
+        navigator.error(f"Action returned failure: {result.message}")
+        return False
+
+    navigator.info(f"Action completed successfully: {result.message}")
     return True
 
 
@@ -169,8 +186,10 @@ def main():
             )
             continue
 
-        time.sleep(5.0)
+        time.sleep(2.0)
         
+        navigator.info("Alignment finished. Rotating 180 degrees now.")
+
         rotated_pose = landmark_to_rotated_pose(navigator, landmark)
         navigator.startToPose(rotated_pose)
 
