@@ -5,17 +5,17 @@ home:
   theta: NORTH
 
 landmarks:
-  #- name: door_outward
-  #  tag_id: 1
-  #  x: 3.14
-  #  y: 0
-  #  theta: SOUTH
+  - name: door_outward
+    tag_id: 1
+    x: 3.14
+    y: 0
+    theta: SOUTH
 
-  #- name: door_inward
-  #  tag_id: 2
-  #  x: 1.71
-  #  y: 0
-  #  theta: NORTH
+  - name: door_inward
+    tag_id: 2
+    x: 1.71
+    y: 0
+    theta: NORTH
 
   # Box 1 Left (Close to home)
   - name: goal_3

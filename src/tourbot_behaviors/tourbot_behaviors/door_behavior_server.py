@@ -118,7 +118,7 @@ class DoorBehaviorServer(Node):
             # Outward door behavior.
             return {
                 "door_type": "OUTWARD",
-                "backup_distance": self.backup_distance_default,
+                "backup_distance": 0,
                 "backup_speed": self.backup_speed_default,
                 "wait_seconds": self.wait_seconds_default,
                 "forward_distance": self.forward_distance_default,
@@ -366,38 +366,41 @@ class DoorBehaviorServer(Node):
         )
 
         try:
-            # Turn around so the robot can move "backward" using forward motion.
-            ok, msg = self.turn_relative_angle(
-                angle_rad=math.pi,
-                angular_speed=TURN_SPEED_DEFAULT,
-                goal_handle=goal_handle,
-                state_name="TURNING_AROUND_TO_BACK_UP",
-            )
+            if backup_distance > 0.0:
+                # Turn around so the robot can move "backward" using forward motion.
+                ok, msg = self.turn_relative_angle(
+                    angle_rad=math.pi,
+                    angular_speed=TURN_SPEED_DEFAULT,
+                    goal_handle=goal_handle,
+                    state_name="TURNING_AROUND_TO_BACK_UP",
+                )
 
-            if not ok:
-                return self.make_failed_result(goal_handle, msg)
+                if not ok:
+                    return self.make_failed_result(goal_handle, msg)
 
-            # Drive forward while facing away from the door.
-            ok, msg = self.drive_linear_distance(
-                speed=abs(backup_speed),
-                target_distance=backup_distance,
-                goal_handle=goal_handle,
-                state_name="DRIVING_AWAY_FROM_DOOR",
-            )
+                # Drive forward while facing away from the door.
+                ok, msg = self.drive_linear_distance(
+                    speed=abs(backup_speed),
+                    target_distance=backup_distance,
+                    goal_handle=goal_handle,
+                    state_name="DRIVING_AWAY_FROM_DOOR",
+                )
 
-            if not ok:
-                return self.make_failed_result(goal_handle, msg)
+                if not ok:
+                    return self.make_failed_result(goal_handle, msg)
 
-            # Turn back to face the original door direction.
-            ok, msg = self.turn_relative_angle(
-                angle_rad=math.pi,
-                angular_speed=TURN_SPEED_DEFAULT,
-                goal_handle=goal_handle,
-                state_name="TURNING_BACK_TO_DOOR",
-            )
+                # Turn back to face the original door direction.
+                ok, msg = self.turn_relative_angle(
+                    angle_rad=math.pi,
+                    angular_speed=TURN_SPEED_DEFAULT,
+                    goal_handle=goal_handle,
+                    state_name="TURNING_BACK_TO_DOOR",
+                )
 
-            if not ok:
-                return self.make_failed_result(goal_handle, msg)
+                if not ok:
+                    return self.make_failed_result(goal_handle, msg)
+            else:
+                self.get_logger().info("Skipping backup behavior for outward door.")
 
             ok, msg = self.wait_with_cancel(
                 wait_seconds,
