@@ -1,0 +1,48 @@
+home:
+  tag_id: 0
+  x: 0
+  y: 0
+  theta: NORTH
+
+landmarks:
+  #- name: door_outward
+  #  tag_id: 1
+  #  x: 3.14
+  #  y: 0
+  #  theta: SOUTH
+
+  #- name: door_inward
+  #  tag_id: 2
+  #  x: 1.71
+  #  y: 0
+  #  theta: NORTH
+
+  - name: goal_3
+    tag_id: 3
+    x: 0.942
+    y: 0.495
+    theta: WEST
+
+  - name: goal_4
+    tag_id: 4
+    x: 1.33
+    y: -0.365
+    theta: EAST
+
+  - name: goal_5
+    tag_id: 5
+    x: 3.36
+    y: -0.38
+    theta: EAST
+
+  - name: goal_6
+    tag_id: 6
+    x: 2.34
+    y: -0.647
+    theta: WEST
+
+  - name: goal_7
+    tag_id: 7
+    x: 2.35
+    y: 0.673
+    theta: EAST
