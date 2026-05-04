@@ -7,6 +7,8 @@ import os
 
 
 def generate_launch_description():
+    '''Launches the tourbot mission, perception nodes, and behavior servers.
+    '''
     # Perception launch file
     apriltag_pipeline_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(

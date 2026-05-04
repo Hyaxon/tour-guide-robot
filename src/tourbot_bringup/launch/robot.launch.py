@@ -7,6 +7,9 @@ import os
 
 
 def generate_launch_description():
+    '''Launches the navigation stack for the tourbot, 
+    including localization using a predefined map and RViz2 for visualization.
+    '''
     # Path to predefined map
     map_yaml = os.path.join(
         get_package_share_directory('tourbot_bringup'),

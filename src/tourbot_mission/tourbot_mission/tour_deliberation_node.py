@@ -15,25 +15,24 @@ from turtlebot4_navigation.turtlebot4_navigator import (
 
 from tourbot_landmarks.landmarks_loader import load_landmarks
 
-
-def to_direction(direction_name: str):
+# Utility function that converts a direction name like "NORTH" to angle in degrees.
+def direction_to_degrees(direction_name: str) -> float:
     try:
-        return getattr(TurtleBot4Directions, direction_name)
+        return float(getattr(TurtleBot4Directions, direction_name))
     except AttributeError as e:
         raise ValueError(f"Invalid direction '{direction_name}' in landmarks.yaml") from e
 
 
-def direction_to_degrees(direction_name: str) -> float:
-    return float(to_direction(direction_name))
-
-
+# Utility functions for converting landmark data to PoseStamped messages.
 def landmark_to_pose(navigator: TurtleBot4Navigator, landmark: dict):
     return navigator.getPoseStamped(
         [float(landmark["x"]), float(landmark["y"])],
         direction_to_degrees(landmark["theta"])
     )
 
-
+# Utility function to convert landmark data to a PoseStamped rotated 180 degrees. 
+# Used to prevent Nav2 from ever navigating backwards, 
+# which is problematic for TurtleBot4. 
 def landmark_to_rotated_pose(navigator: TurtleBot4Navigator, landmark: dict):
     theta = direction_to_degrees(landmark["theta"])
     rotated_theta = (theta + 180.0) % 360.0
@@ -43,7 +42,8 @@ def landmark_to_rotated_pose(navigator: TurtleBot4Navigator, landmark: dict):
         rotated_theta
     )
 
-
+# To plan a tour, we decided to use a simple greedy approach, 
+# the tourbot will always navigate to the nearest unvisited landmark next.
 def get_nearest_landmark(l1x, l1y, landmark_raw_data):
     nearest_landmark = 0
     nearest_dist = float("inf")
@@ -57,7 +57,8 @@ def get_nearest_landmark(l1x, l1y, landmark_raw_data):
 
     return nearest_landmark
 
-
+# Utility function to call an action and wait for the result,
+# while also spinning the navigator node to keep it responsive.
 def call_action_and_wait(navigator, action_client, goal_msg):
     navigator.info("Waiting for action server...")
 
@@ -69,6 +70,7 @@ def call_action_and_wait(navigator, action_client, goal_msg):
 
     send_goal_future = action_client.send_goal_async(goal_msg)
 
+    # Wait for the goal to be accepted and get the result, while spinning the navigator to keep it responsive.
     while rclpy.ok() and not send_goal_future.done():
         rclpy.spin_once(navigator, timeout_sec=0.1)
 
@@ -86,6 +88,8 @@ def call_action_and_wait(navigator, action_client, goal_msg):
 
     result_future = goal_handle.get_result_async()
 
+    # Wait for the result while spinning the navigator to keep it responsive. 
+    # If ROS is shut down while waiting, abort the action and return failure.
     while rclpy.ok() and not result_future.done():
         rclpy.spin_once(navigator, timeout_sec=0.1)
 
@@ -111,10 +115,14 @@ def call_action_and_wait(navigator, action_client, goal_msg):
     navigator.info(f"Action completed successfully: {result.message}")
     return True
 
+# Simple utility for checking if the tag is a door tag. 
+# We chose 1 and 2 to be door tags 
+# 1 is an outward door and 2 is an inward door. 
 def is_door_tag(tag_id: int) -> bool:
     return tag_id in (1, 2)
 
-
+# Helper function to run the door sequence, 
+# which waits for the door tag to be removed and then calls the door traverse action.
 def run_door_sequence(navigator, wait_client, door_client, landmark):
     tag_id = int(landmark["tag_id"])
 
@@ -137,15 +145,12 @@ def run_door_sequence(navigator, wait_client, door_client, landmark):
 
     door_goal = DoorTraverse.Goal()
 
-    # Use your DoorTraverse defaults by leaving these as 0.0,
-    # assuming your action fields match the server code you showed.
+    # Rely on defaults
     door_goal.backup_distance = 0.0
     door_goal.backup_speed = 0.0
     door_goal.wait_seconds = 0.0
     door_goal.forward_distance = 0.0
     door_goal.forward_speed = 0.0
-
-    # If your DoorTraverse.action has a tag_id field, set it:
     door_goal.tag_id = tag_id
 
     door_done = call_action_and_wait(
@@ -160,11 +165,15 @@ def run_door_sequence(navigator, wait_client, door_client, landmark):
 
     return True
 
+# Main function for the tour deliberation node, 
+# which plans the tour and executes it by navigating to each landmark 
+# and performing the appropriate actions based on whether it's a door or not.
 def main():
     rclpy.init()
 
-    navigator = TurtleBot4Navigator()
+    navigator = TurtleBot4Navigator() # The Turtlebot4Navigator handles the core navigation stack.
 
+    # Define action clients for the behaviors we will need during the tour.
     align_client = ActionClient(
         navigator,
         AlignToAprilTag,
@@ -183,9 +192,11 @@ def main():
         "door_traverse"
     )
 
+    # Load landmark data from the YAML file for the specified map.
     map_name = "cardboard_city"
     landmark_data = load_landmarks(map_name)
 
+    # Docking behavior if needed. 
     # Start on dock
     #if not navigator.getDockedStatus():
     #    navigator.info('Docking before intialising pose')
@@ -195,6 +206,8 @@ def main():
     initial_pose_data = landmark_data["home"]
     initial_pose = landmark_to_pose(navigator, initial_pose_data)
 
+    # Ran into issues with the initial pose not being set correctly, 
+    # so we set it multiple times with some delay to ensure it is set.
     for _ in range(10):
         navigator.setInitialPose(initial_pose)
         rclpy.spin_once(navigator, timeout_sec=0.1)
@@ -203,7 +216,7 @@ def main():
     # Wait for Nav2
     navigator.waitUntilNav2Active()
 
-    # Set goal poses
+    # Convert the landmark data into a tour order using a greedy nearest neighbor approach,
     landmark_raw_data = []
     for landmark in landmark_data["landmarks"]:
         landmark_raw_data.append(landmark)
@@ -238,6 +251,7 @@ def main():
 
         tag_id = int(landmark["tag_id"])
 
+        # Align to the AprilTag at the landmark using the align_to_apriltag action server.
         align_goal = AlignToAprilTag.Goal()
         align_goal.tag_id = tag_id
         align_goal.timeout_sec = 30.0
@@ -255,8 +269,10 @@ def main():
             )
             continue
 
+        # Wait a moment after alignment. 
         time.sleep(1.0)
 
+        # If this is a door tag, run the door sequence.
         if is_door_tag(tag_id):
             navigator.info(
                 f"Tag {tag_id} is a door tag. Waiting for removal before traversal."
@@ -275,6 +291,7 @@ def main():
                 )
                 continue
 
+        # If this is not a door tag, we can just rotate in place to away from the landmark,
         if not is_door_tag(tag_id):
             navigator.info("Landmark interaction finished. Rotating 180 degrees now.")
 
@@ -290,6 +307,6 @@ def main():
 
     rclpy.shutdown()
 
-
+# Entry point for the tour deliberation node.
 if __name__ == '__main__':
     main()

@@ -10,13 +10,17 @@ from rclpy.node import Node
 from apriltag_msgs.msg import AprilTagDetectionArray
 from tourbot_interfaces.action import WaitForTagRemoved
 
+#TODO: Add beeping sound to alert nearby humans for help 
 
 class WaitForTagRemovedServer(Node):
+    """Action server that waits for a specified AprilTag to be removed from the camera's field of view for a certain duration, with a timeout.
+    """
     def __init__(self):
         super().__init__("wait_for_tag_removed_server")
 
-        self.cb_group = ReentrantCallbackGroup()
+        self.cb_group = ReentrantCallbackGroup() # Use a reentrant callback group to allow concurrent execution of callbacks
 
+        # Server parameters
         self.declare_parameter("detections_topic", "/detections")
         self.declare_parameter("control_rate_hz", 20.0)
 
@@ -25,6 +29,7 @@ class WaitForTagRemovedServer(Node):
 
         self.latest_detections: Optional[AprilTagDetectionArray] = None
 
+        # Subscribe to AprilTag detections to keep track of which tags are currently visible.
         self.detections_sub = self.create_subscription(
             AprilTagDetectionArray,
             detections_topic,
@@ -33,6 +38,7 @@ class WaitForTagRemovedServer(Node):
             callback_group=self.cb_group,
         )
 
+        # Create the action server for WaitForTagRemoved.
         self.action_server = ActionServer(
             self,
             WaitForTagRemoved,
@@ -43,17 +49,21 @@ class WaitForTagRemovedServer(Node):
             callback_group=self.cb_group,
         )
 
+        # Debug info
         self.get_logger().info("WaitForTagRemoved action server ready.")
-        self.get_logger().info(f"Listening for detections on: {detections_topic}")
+        #self.get_logger().info(f"Listening for detections on: {detections_topic}")
 
+    # Callback for receiving AprilTag detections
     def detections_callback(self, msg: AprilTagDetectionArray):
         self.latest_detections = msg
 
+    # Action server callbacks
     def goal_callback(self, goal_request: WaitForTagRemoved.Goal) -> int:
         self.get_logger().info(
             f"Received wait-for-tag-removed goal for tag_id={goal_request.tag_id}"
         )
 
+        # Validate the goal parameters before accepting it.
         if goal_request.timeout_sec <= 0.0:
             self.get_logger().warn(
                 "Rejected goal: timeout_sec must be positive."
@@ -68,10 +78,12 @@ class WaitForTagRemovedServer(Node):
 
         return GoalResponse.ACCEPT
 
+    # Callback for handling cancellation requests
     def cancel_callback(self, goal_handle) -> int:
         self.get_logger().info("Received request to cancel wait-for-tag-removed.")
         return CancelResponse.ACCEPT
 
+    # Determine if the specified tag_id is currently visible in the latest detections.
     def tag_is_visible(self, tag_id: int) -> bool:
         if self.latest_detections is None:
             return False
@@ -82,12 +94,14 @@ class WaitForTagRemovedServer(Node):
 
         return False
 
+    # Helper function to get a list of currently visible tag IDs for logging/debugging purposes.
     def get_visible_tag_ids(self):
         if self.latest_detections is None:
             return []
-
+    
         return [int(detection.id) for detection in self.latest_detections.detections]
 
+    # Publish feedback about the current visibility state of the tag and how long it has been missing if applicable.
     def publish_feedback(
         self,
         goal_handle,
@@ -101,6 +115,7 @@ class WaitForTagRemovedServer(Node):
         feedback.state = state
         goal_handle.publish_feedback(feedback)
 
+    # Main execution callback for the action server. Waits for the specified tag to be removed from view for the required duration, or until timeout/cancellation.
     def execute_callback(self, goal_handle):
         goal = goal_handle.request
         result = WaitForTagRemoved.Result()
@@ -109,6 +124,7 @@ class WaitForTagRemovedServer(Node):
             f"Waiting for AprilTag {goal.tag_id} to be removed from FOV."
         )
 
+        # Document start time to enforce the overall timeout, and track how long the tag has been missing.
         start_time = time.monotonic()
         missing_start_time = None
         sleep_dt = 1.0 / self.control_rate_hz
@@ -127,7 +143,8 @@ class WaitForTagRemovedServer(Node):
             now = time.monotonic()
             elapsed = now - start_time
 
-            if elapsed > goal.timeout_sec:
+            # If the timeout time has been exceeded, abort the action and return failure with a message. 
+            if elapsed > goal.timeout_sec: 
                 goal_handle.abort()
 
                 visible_ids = self.get_visible_tag_ids()
@@ -140,6 +157,7 @@ class WaitForTagRemovedServer(Node):
 
             visible = self.tag_is_visible(goal.tag_id)
 
+            # Tag is currently visible, reset missing timer and publish feedback. 
             if visible:
                 missing_start_time = None
                 missing_time = 0.0
@@ -163,6 +181,7 @@ class WaitForTagRemovedServer(Node):
                 time.sleep(sleep_dt)
                 continue
 
+            # Tag is currently not visible and this is the first time we've seen it missing.
             if missing_start_time is None:
                 missing_start_time = now
 
@@ -176,6 +195,8 @@ class WaitForTagRemovedServer(Node):
                 state=state,
             )
 
+            # Count how long the tag has been missing and if it exceeds the required missing duration, succeed the action. 
+            # Otherwise, keep waiting and publishing feedback.
             if state != last_state or now - last_log_time > 0.5:
                 self.get_logger().info(
                     f"Tag {goal.tag_id} missing for {missing_time:.2f}s / "
@@ -196,13 +217,14 @@ class WaitForTagRemovedServer(Node):
 
             time.sleep(sleep_dt)
 
+        # rclpy is not okay, ROS is getting shut down.
         goal_handle.abort()
 
         result.success = False
         result.message = "ROS shutdown during WaitForTagRemoved."
         return result
 
-
+# Node entry point
 def main(args=None):
     rclpy.init(args=args)
 
@@ -220,6 +242,6 @@ def main(args=None):
         node.destroy_node()
         rclpy.shutdown()
 
-
+# Allow running the node directly with `python wait_for_tag_removed_server.py`
 if __name__ == "__main__":
     main()
