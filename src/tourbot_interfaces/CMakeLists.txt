@@ -12,6 +12,8 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/DoorTraverse.action"
   "action/DoLandmarkTask.action"
+  "action/AlignToAprilTag.action"
+  "action/WaitForTagRemoved.action"
 )
 
 ament_export_dependencies(rosidl_default_runtime)

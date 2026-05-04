@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -63,7 +63,16 @@ def generate_launch_description():
     
 
     return LaunchDescription([
-        view_navigation_launch,
         localization_launch,
-        nav2_launch
+
+        TimerAction(
+            period=5.0,
+            actions=[nav2_launch]
+        ),
+
+        TimerAction(
+            period=7.0,
+            actions=[view_navigation_launch]
+        ),
     ])
+

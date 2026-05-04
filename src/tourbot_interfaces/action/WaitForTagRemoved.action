@@ -1,7 +1,7 @@
 # Goal
 int32 tag_id
 float32 timeout_sec
-float32 x_tolerance_px
+float32 missing_duration_sec
 
 ---
 # Result
@@ -10,6 +10,6 @@ string message
 
 ---
 # Feedback
-float32 x_error_px
 bool tag_visible
+float32 missing_time_sec
 string state
