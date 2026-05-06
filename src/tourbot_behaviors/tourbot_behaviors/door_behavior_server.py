@@ -16,6 +16,7 @@ from tourbot_interfaces.action import DoorTraverse
 
 TURN_SPEED_DEFAULT = 0.1
 
+# TODO: Add beeping sound while navigating the door. 
 
 class DoorBehaviorServer(Node):
     def __init__(self) -> None:

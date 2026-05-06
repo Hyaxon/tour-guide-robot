@@ -5,6 +5,8 @@ import os
 
 
 def generate_launch_description():
+    """Launches the AprilTag detection node with the appropriate parameters and remappings for the tourbot.
+    """
     pkg_share = get_package_share_directory('tourbot_perception')
     tag_config = os.path.join(pkg_share, 'config', 'apriltags_36h11.yaml')
 

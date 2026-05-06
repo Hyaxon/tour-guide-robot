@@ -6,6 +6,8 @@ from rclpy.node import Node
 
 from apriltag_msgs.msg import AprilTagDetectionArray
 
+# NOTE 
+# File implemented in tourbot_perception and wait_for_tag_removed_server, this file is no longer needed. 
 
 class DoorDetectorNode(Node):
     def __init__(self) -> None:
