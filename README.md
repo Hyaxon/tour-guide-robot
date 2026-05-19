@@ -1,4 +1,4 @@
-# tour_guide_robot
+# tour-guide-robot
 
 ROS 2 TurtleBot4 tour guide robot that navigates a mapped indoor environment, visits predefined landmarks, uses AprilTags for landmark confirmation and alignment, and handles simplified door-aware behaviors through custom ROS 2 action servers.
 
